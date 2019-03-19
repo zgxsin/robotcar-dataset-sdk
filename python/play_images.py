@@ -22,23 +22,23 @@ from camera_model import CameraModel
 
 parser = argparse.ArgumentParser(description='Play back images from a given directory')
 
-parser.add_argument('dir', type=str, help='Directory containing images.')
+parser.add_argument('--images_dir', type=str, help='Directory containing images.')
 parser.add_argument('--models_dir', type=str, default=None, help='(optional) Directory containing camera model. If supplied, images will be undistorted before display')
 parser.add_argument('--scale', type=float, default=1.0, help='(optional) factor by which to scale images before display')
 
 args = parser.parse_args()
 
-camera = re.search('(stereo|mono_(left|right|rear))', args.dir).group(0)
+camera = re.search('(stereo|mono_(left|right|rear))', args.images_dir).group(0)
 
-timestamps_path = os.path.join(os.path.join(args.dir, os.pardir, camera + '.timestamps'))
+timestamps_path = os.path.join(os.path.join(args.images_dir, os.pardir, camera + '.timestamps'))
 if not os.path.isfile(timestamps_path):
-  timestamps_path = os.path.join(args.dir, os.pardir, os.pardir, camera + '.timestamps')
+  timestamps_path = os.path.join(args.images_dir, os.pardir, os.pardir, camera + '.timestamps')
   if not os.path.isfile(timestamps_path):
       raise IOError("Could not find timestamps file")
 
 model = None
 if args.models_dir:
-    model = CameraModel(args.models_dir, args.dir)
+    model = CameraModel(args.models_dir, args.images_dir)
 
 current_chunk = 0
 timestamps_file = open(timestamps_path)
@@ -47,7 +47,7 @@ for line in timestamps_file:
     datetime = dt.utcfromtimestamp(int(tokens[0])/1000000)
     chunk = int(tokens[1])
 
-    filename = os.path.join(args.dir, tokens[0] + '.png')
+    filename = os.path.join(args.images_dir, tokens[0] + '.png')
     if not os.path.isfile(filename):
         if chunk != current_chunk:
             print("Chunk " + str(chunk) + " not found")
