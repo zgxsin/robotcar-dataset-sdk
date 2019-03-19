@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime as dt
 from image import load_image
 from camera_model import CameraModel
+from PIL import Image
 
 parser = argparse.ArgumentParser(description='Play back images from a given directory')
 
@@ -42,7 +43,15 @@ if args.models_dir:
 
 current_chunk = 0
 timestamps_file = open(timestamps_path)
-for line in timestamps_file:
+path_to_write = os.path.join(args.images_dir, os.pardir, "recified")
+if os.path.exists(path_to_write):
+    pass
+else:
+    os.mkdir(path_to_write)
+print(path_to_write)
+files = os.listdir(args.images_dir)
+num_files = len(files)
+for id, line in enumerate(timestamps_file):
     tokens = line.split()
     datetime = dt.utcfromtimestamp(int(tokens[0])/1000000)
     chunk = int(tokens[1])
@@ -57,8 +66,13 @@ for line in timestamps_file:
     current_chunk = chunk
 
     img = load_image(filename, model)
-    plt.imshow(img)
-    plt.xlabel(datetime)
-    plt.xticks([])
-    plt.yticks([])
-    plt.pause(0.01)
+    # print(type(img))
+    img = Image.fromarray(img)
+    # print(type(img))
+    img.save(os.path.join(path_to_write, tokens[0] + '.png'))
+    print("Processing {0}/{1} image".format(id+1, num_files))
+    # plt.imshow(img)
+    # plt.xlabel(datetime)
+    # plt.xticks([])
+    # plt.yticks([])
+    # plt.pause(0.01)
