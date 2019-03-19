@@ -13,11 +13,12 @@
 ################################################################################
 
 import os
+import sys
 import re
 import numpy as np
 from transform import build_se3_transform
 
-from interpolate_poses import interpolate_vo_poses, interpolate_ins_poses
+from interpolate_poses import interpolate_vo_poses, interpolate_ins_poses, convert_ins_poses_to_TUM_Format
 
 
 def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time, origin_time=-1):
@@ -117,6 +118,15 @@ if __name__ == "__main__":
     parser.add_argument('--laser_dir', type=str, default=None, help='Directory containing LIDAR data')
 
     args = parser.parse_args()
+
+    #================================================================================================
+    #convertion_GX
+    convert_ins_poses_to_TUM_Format(args.poses_file)
+    sys.exit() # quitthe program here
+    #=============================================================================================
+
+
+
 
     lidar = re.search('(lms_front|lms_rear|ldmrs)', args.laser_dir).group(0)
     timestamps_path = os.path.join(args.laser_dir, os.pardir, lidar + '.timestamps')

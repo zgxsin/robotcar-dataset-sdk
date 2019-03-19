@@ -14,6 +14,7 @@
 
 import bisect
 import csv
+import os
 import numpy as np
 import numpy.matlib as ml
 from transform import *
@@ -96,6 +97,38 @@ def interpolate_ins_poses(ins_path, pose_timestamps, origin_timestamp):
     abs_poses = abs_poses[1:]
 
     return interpolate_poses(ins_timestamps, abs_poses, pose_timestamps, origin_timestamp)
+
+
+
+def convert_ins_poses_to_TUM_Format(ins_path):
+
+    with open(ins_path) as ins_file:
+        ins_reader = csv.reader(ins_file)
+        headers = next(ins_file)
+
+        # ins_timestamps = []
+        abs_poses = []
+
+        for row in ins_reader:
+            # timestamp = float(row[0])
+            # ins_timestamps.append(timestamp)
+            timestamp = [int(row[0])]
+            xyz = [float(v) for v in row[5:8]]
+            rpy = [float(v) for v in row[-3:]]
+
+            tmp_so3 = euler_to_so3(rpy)
+            quat = so3_to_quaternion_GX(tmp_so3)
+
+            abs_poses.append( timestamp + xyz + quat)
+            # break
+
+
+    # path = os.path.join(ins_path, os.pardir, "groundtruth.txt")
+    path = "/nas/guzhou/Downloads/RobotCar/Sample/gps/groundtruth.txt"
+
+    with open(path, 'w') as file:
+        for item in abs_poses:
+            file.write(str(item)[1:-1])
 
 
 def interpolate_poses(pose_timestamps, abs_poses, requested_timestamps, origin_timestamp):
