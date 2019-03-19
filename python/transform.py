@@ -159,6 +159,64 @@ def so3_to_quaternion(so3):
     return np.array([w, x, y, z])
 
 
+
+def so3_to_quaternion_GX(so3):
+    """Converts an SO3 rotation matrix to a quaternion
+
+    Args:
+        so3: 3x3 rotation matrix
+
+    Returns:
+        numpy.ndarray: quaternion [w, x, y, z]
+
+    Raises:
+        ValueError: if so3 is not 3x3
+    """
+    if so3.shape != (3, 3):
+        raise ValueError("SO3 matrix must be 3x3")
+
+    R_xx = so3[0, 0]
+    R_xy = so3[0, 1]
+    R_xz = so3[0, 2]
+    R_yx = so3[1, 0]
+    R_yy = so3[1, 1]
+    R_yz = so3[1, 2]
+    R_zx = so3[2, 0]
+    R_zy = so3[2, 1]
+    R_zz = so3[2, 2]
+
+    try:
+        w = sqrt(so3.trace() + 1) / 2
+    except(ValueError):
+        # w is non-real
+        w = 0
+
+    x = sqrt(1 + R_xx - R_yy - R_zz) / 2
+    y = sqrt(1 + R_yy - R_xx - R_zz) / 2
+    z = sqrt(1 + R_zz - R_yy - R_xx) / 2
+
+    max_index = max(range(4), key=[w, x, y, z].__getitem__)
+
+    if max_index == 0:
+        x = (R_zy - R_yz) / (4 * w)
+        y = (R_xz - R_zx) / (4 * w)
+        z = (R_yx - R_xy) / (4 * w)
+    elif max_index == 1:
+        w = (R_zy - R_yz) / (4 * x)
+        y = (R_xy + R_yx) / (4 * x)
+        z = (R_zx + R_xz) / (4 * x)
+    elif max_index == 2:
+        w = (R_xz - R_zx) / (4 * y)
+        x = (R_xy + R_yx) / (4 * y)
+        z = (R_yz + R_zy) / (4 * y)
+    elif max_index == 3:
+        w = (R_yx - R_xy) / (4 * z)
+        x = (R_zx + R_xz) / (4 * z)
+        y = (R_yz + R_zy) / (4 * z)
+
+    return list([x, y, z, w])
+
+
 def se3_to_components(se3):
     """Converts an SE3 rotation matrix to linear translation and Euler angles
 
