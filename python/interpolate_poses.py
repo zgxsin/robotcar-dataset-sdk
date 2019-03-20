@@ -100,8 +100,9 @@ def interpolate_ins_poses(ins_path, pose_timestamps, origin_timestamp):
 
 
 
-def convert_ins_poses_to_TUM_Format(ins_path):
-
+def convert_ins_poses_to_TUM_Format(ins_path_arg):
+    ins_path = os.path.join(ins_path_arg, "ins.csv")
+    path_to_write = os.path.join(ins_path_arg, "groundtruth.txt")
     with open(ins_path) as ins_file:
         ins_reader = csv.reader(ins_file)
         headers = next(ins_file)
@@ -119,16 +120,20 @@ def convert_ins_poses_to_TUM_Format(ins_path):
             tmp_so3 = euler_to_so3(rpy)
             quat = so3_to_quaternion_GX(tmp_so3)
 
-            abs_poses.append( timestamp + xyz + quat)
+            abs_poses.append(timestamp + xyz + quat)
             # break
 
 
-    # path = os.path.join(ins_path, os.pardir, "groundtruth.txt")
-    path = "/nas/guzhou/Downloads/RobotCar/Sample/gps/groundtruth.txt"
 
-    with open(path, 'w') as file:
-        for item in abs_poses:
-            file.write(str(item)[1:-1])
+    # if os.path.exists(path):
+    #     pass
+    # else:
+    #     os.mkdir(path)
+
+    with open(path_to_write, 'w') as file:
+        for id, item in enumerate(abs_poses):
+            file.write(str(item)[1:-1] + '\n')
+
 
 
 def interpolate_poses(pose_timestamps, abs_poses, requested_timestamps, origin_timestamp):

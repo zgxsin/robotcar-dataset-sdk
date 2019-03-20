@@ -18,7 +18,7 @@ import re
 import numpy as np
 from transform import build_se3_transform
 
-from interpolate_poses import interpolate_vo_poses, interpolate_ins_poses, convert_ins_poses_to_TUM_Format
+from interpolate_poses import interpolate_vo_poses, interpolate_ins_poses
 
 
 def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time, origin_time=-1):
@@ -119,11 +119,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    #================================================================================================
-    #convertion_GX
-    convert_ins_poses_to_TUM_Format(args.poses_file)
-    sys.exit() # quitthe program here
-    #=============================================================================================
+    # #================================================================================================
+    # #convertion_GX
+    # convert_ins_poses_to_TUM_Format(args.poses_file)
+    # sys.exit() # quitthe program here
+    # #=============================================================================================
 
 
 
