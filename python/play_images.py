@@ -24,39 +24,41 @@ from PIL import Image
 parser = argparse.ArgumentParser(description='Play back images from a given directory')
 
 parser.add_argument('--images_dir', type=str, help='Directory containing images.')
+parser.add_argument('--folder', type=str, help='left/right')
 parser.add_argument('--models_dir', type=str, default=None, help='(optional) Directory containing camera model. If supplied, images will be undistorted before display')
 parser.add_argument('--scale', type=float, default=1.0, help='(optional) factor by which to scale images before display')
 
 args = parser.parse_args()
 
-camera = re.search('(stereo|mono_(left|right|rear))', args.images_dir).group(0)
+images_dir = os.path.join(args.images_dir, args.folder)
+camera = re.search('(stereo|mono_(left|right|rear))', images_dir).group(0)
 
-timestamps_path = os.path.join(os.path.join(args.images_dir, os.pardir, camera + '.timestamps'))
+timestamps_path = os.path.join(os.path.join(images_dir, os.pardir, camera + '.timestamps'))
 if not os.path.isfile(timestamps_path):
-  timestamps_path = os.path.join(args.images_dir, os.pardir, os.pardir, camera + '.timestamps')
+  timestamps_path = os.path.join(images_dir, os.pardir, os.pardir, camera + '.timestamps')
   if not os.path.isfile(timestamps_path):
       raise IOError("Could not find timestamps file")
 
 model = None
 if args.models_dir:
-    model = CameraModel(args.models_dir, args.images_dir)
+    model = CameraModel(args.models_dir, images_dir)
 
 current_chunk = 0
 timestamps_file = open(timestamps_path)
-path_to_write = os.path.join(args.images_dir, os.pardir, "recified")
+path_to_write = os.path.join(images_dir, os.pardir, args.folder+"_recified")
 if os.path.exists(path_to_write):
     pass
 else:
     os.mkdir(path_to_write)
 print(path_to_write)
-files = os.listdir(args.images_dir)
+files = os.listdir(images_dir)
 num_files = len(files)
 for id, line in enumerate(timestamps_file):
     tokens = line.split()
     datetime = dt.utcfromtimestamp(int(tokens[0])/1000000)
     chunk = int(tokens[1])
 
-    filename = os.path.join(args.images_dir, tokens[0] + '.png')
+    filename = os.path.join(images_dir, tokens[0] + '.png')
     if not os.path.isfile(filename):
         if chunk != current_chunk:
             print("Chunk " + str(chunk) + " not found")
